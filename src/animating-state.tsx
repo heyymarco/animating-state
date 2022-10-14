@@ -15,7 +15,6 @@ import { useEvent } from '@reusable-ui/hooks'
 
 export interface AnimatingStateOptions<TState> {
     initialState       : TState | (() => TState)
-    currentState       : TState
     
     animationBubbling ?: boolean
     animationName      : string|RegExp
@@ -24,7 +23,6 @@ export const useAnimatingState = <TState, TElement extends Element = HTMLElement
     // options:
     const {
         initialState,
-        currentState,
         
         animationBubbling = false,
         animationName,
@@ -38,20 +36,21 @@ export const useAnimatingState = <TState, TElement extends Element = HTMLElement
     
     
     
-    // updates:
-    const newState = currentState;     // get the new state
-    
-    if (state !== newState) {          // a change detected => apply the change & start animation
-        setState(newState);            // remember the new state
-        
-        if (animation === undefined) { // if not **being** animated
-            setAnimation(newState);    // start animation of **new** state
-        } // if
-    } // if
-    
-    
-    
     // handlers:
+    const setStateExternal = useEvent<React.Dispatch<React.SetStateAction<TState>>>((newState) => {
+        // conditions:
+        const newStateValue = (typeof(newState) !== 'function') ? newState : (newState as ((s: TState) => TState))(state);
+        if (state === newStateValue) return; // no change => nothing to do
+        
+        
+        
+        // updates:
+        setState(newState);              // remember the new state
+        
+        if (animation === undefined) {   // if not **being** animated
+            setAnimation(newStateValue); // start animation of **new** state
+        } // if
+    });
     const handleAnimationEnd = useEvent<React.AnimationEventHandler<TElement>>((event) => {
         // conditions:
         if (animation === undefined)                                      return; // no running animation => nothing to stop
@@ -74,6 +73,8 @@ export const useAnimatingState = <TState, TElement extends Element = HTMLElement
     // interfaces:
     return [
         state,
+        setStateExternal,
+        
         animation,
         handleAnimationEnd,
     ] as const;

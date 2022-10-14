@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { useEvent } from "@reusable-ui/hooks";
 import { useAnimatingState } from "./animating-state";
 import './Button.css'
 
 
+
 const useInteractable = () => {
-    const [hoverDn, setHoverDn] = useState<boolean>(false);
-    const [arrived, animation, handleAnimationEnd] = useAnimatingState({
-        initialState  : hoverDn,
-        currentState  : hoverDn,
+    const [arrived, setArrived, animation, handleAnimationEnd] = useAnimatingState({
+        initialState  : false,
         animationName : /((?<![a-z])(arrive|leave)|(?<=[a-z])(Arrive|Leave))(?![a-z])/,
     });
     
@@ -16,15 +15,16 @@ const useInteractable = () => {
     
     // handlers:
     const handleMouseEnter   = useEvent<React.MouseEventHandler<HTMLButtonElement>>(() => {
-        setHoverDn(true);
+        setArrived(true);
     });
     
     const handleMouseLeave   = useEvent<React.MouseEventHandler<HTMLButtonElement>>(() => {
-        setHoverDn(false);
+        setArrived(false);
     });
     
     
     
+    // console.log({hoverDn, arrived, animation})
     return {
         arrived,
         
@@ -54,7 +54,10 @@ export const Button = () => {
     const interactableState = useInteractable();
     
     
-    
+    console.log({
+        arrived : interactableState.arrived,
+        class   : interactableState.class,
+    });
     return (
         <button
             className={interactableState.class ?? ''}
