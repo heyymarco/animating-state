@@ -148,10 +148,10 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
     
     // interfaces:
     return [
-        state.state,
-        setState,
+        state.state,        // getter state
+        setState,           // setter state
         
-        state.animation,
-        handleAnimationEnd,
+        state.animation,    // animation state
+        handleAnimationEnd, // animation-end handler
     ] as const;
 };
