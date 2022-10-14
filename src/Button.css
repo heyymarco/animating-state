@@ -16,14 +16,14 @@ button.leaving {
 }
 button.leaved {
     background: gray;
-    border-radius: 0rem;
+    border-radius: 0.25rem;
 }
 
 
 @keyframes arrive {
     from {
         background: gray;
-        border-radius: 0rem;
+        border-radius: 0.25rem;
     }
     to {
         background: red;
@@ -38,6 +38,6 @@ button.leaved {
     }
     to {
         background: gray;
-        border-radius: 0rem;
+        border-radius: 0.25rem;
     }
 }
