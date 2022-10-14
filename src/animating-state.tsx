@@ -6,20 +6,78 @@ import {
     
     
     // hooks:
-    useState,
+    useReducer,
 }                           from 'react'
 
 import { useEvent } from '@reusable-ui/hooks'
 
 
 
-export interface AnimatingStateOptions<TState> {
-    initialState       : TState | (() => TState)
+interface AnimatingState<TState extends ({}|null)> {
+    state     : TState
+    animation : TState|undefined
+}
+interface AnimatingStateChangeAction<TState extends ({}|null)> {
+    type      : 'change',
+    newState  : TState
+}
+interface AnimatingStateDoneAction<TState extends ({}|null)> {
+    type      : 'done',
+}
+type AnimatingStateAction<TState extends ({}|null)> =
+    |AnimatingStateChangeAction<TState>
+    |AnimatingStateDoneAction<TState>
+
+const animatingStateReducer = <TState extends ({}|null)>(oldState: AnimatingState<TState>, action: AnimatingStateAction<TState>): AnimatingState<TState> => {
+    switch (action.type) {
+        case 'change':
+            if (!Object.is(oldState.state, action.newState)) {
+                return {
+                    state     : action.newState,           // remember the new state
+                    animation : (
+                        (oldState.animation === undefined) // if not **being** animated
+                        ?
+                        action.newState                    // start animation of **new** state
+                        :
+                        oldState.animation                 // continue unfinished animation of **old** state
+                    ),
+                };
+            } // if
+            break;
+        
+        case 'done':
+            if (oldState.animation !== undefined) { // **has** a running animation
+                return {
+                    state     : oldState.state,
+                    animation : (
+                        Object.is(oldState.animation, oldState.state)
+                        
+                        ?              // the current state **was animated**
+                        undefined      // => stop animation of **current** state
+                        
+                        :              // the current state **was changed** during the animation
+                        oldState.state // => start animation of **another** state
+                    ),
+                };
+            } // if
+            break;
+    } // switch
     
-    animationBubbling ?: boolean
-    animationName      : string|RegExp
+    
+    
+    // no change:
+    return oldState;
 };
-export const useAnimatingState = <TState, TElement extends Element = HTMLElement>(options: AnimatingStateOptions<TState>) => {
+
+
+
+export interface AnimatingStateOptions<TState extends ({}|null)> {
+    initialState       : TState | (() => TState) // required
+    
+    animationBubbling ?: boolean                 // optional
+    animationName      : string|RegExp           // required
+};
+export const useAnimatingState = <TState extends ({}|null), TElement extends Element = HTMLElement>(options: AnimatingStateOptions<TState>) => {
     // options:
     const {
         initialState,
@@ -31,51 +89,38 @@ export const useAnimatingState = <TState, TElement extends Element = HTMLElement
     
     
     // states:
-    const [state    , setState    ] = useState<TState>(initialState);
-    const [animation, setAnimation] = useState<TState|undefined>(undefined);
+    const [state, dispatchState] = useReducer(animatingStateReducer, {
+        // initials:
+        state     : initialState,
+        animation : undefined,
+    });
     
     
     
     // handlers:
-    const setStateExternal = useEvent<React.Dispatch<React.SetStateAction<TState>>>((newState) => {
-        // conditions:
-        const newStateValue = (typeof(newState) !== 'function') ? newState : (newState as ((s: TState) => TState))(state);
-        if (state === newStateValue) return; // no change => nothing to do
-        
-        
-        
-        // updates:
-        setState(newState);              // remember the new state
-        
-        if (animation === undefined) {   // if not **being** animated
-            setAnimation(newStateValue); // start animation of **new** state
-        } // if
+    const setState           = useEvent<React.Dispatch<React.SetStateAction<TState>>>((newState) => {
+        // update with a new state:
+        dispatchState({ type: 'change', newState });
     });
     const handleAnimationEnd = useEvent<React.AnimationEventHandler<TElement>>((event) => {
         // conditions:
-        if (animation === undefined)                                      return; // no running animation => nothing to stop
         if (!animationBubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
         if (!event.animationName.match(animationName))                    return; // ignores foreign animations
         
         
         
         // clean up finished animation:
-        if (animation === state) {   // the current state **was animated**
-            setAnimation(undefined); // => stop animation of **current** state
-        }
-        else {                       // the current state **was changed** during the animation
-            setAnimation(state);     // => start animation of **another** state
-        } // if
+        dispatchState({ type: 'done' });
     });
     
     
     
     // interfaces:
     return [
-        state,
-        setStateExternal,
+        state.state,
+        setState,
         
-        animation,
+        state.animation,
         handleAnimationEnd,
     ] as const;
 };
