@@ -1,10 +1,5 @@
 // react:
 import {
-    // react:
-    default as React,
-    
-    
-    
     // types:
     SetStateAction,
     Reducer,
