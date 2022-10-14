@@ -15,7 +15,7 @@ import { useEvent } from '@reusable-ui/hooks'
 
 export interface AnimatingStateConfig<TState extends any> {
     initialState   : TState | (() => TState)
-    updateState   ?: (state: TState) => TState
+    fnState       ?: (state: TState) => TState
     
     bubbling      ?: boolean
     animationName  : string|RegExp
@@ -24,7 +24,7 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
     // configs:
     const {
         initialState,
-        updateState,
+        fnState,
         
         bubbling = false,
         animationName,
@@ -39,7 +39,7 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
     
     
     // updates:
-    const newState = updateState ? updateState(state) : state; // calculate the new state
+    const newState = fnState ? fnState(state) : state; // calculate the new state
     
     if (state !== newState) {          // a change detected => apply the change & start animating
         setState(newState);            // remember the new state
@@ -72,11 +72,11 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
     
     
     // interfaces:
-    return {
+    return [
         state,
         setState,
         
         animation,
         handleAnimationEnd,
-    };
+    ] as const;
 };
