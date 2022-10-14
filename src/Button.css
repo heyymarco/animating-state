@@ -9,29 +9,35 @@ button.arriving {
 }
 button.arrived {
     background: red;
+    border-radius: 1rem;
 }
 button.leaving {
     animation: 300ms ease-out both leave;
 }
 button.leaved {
     background: gray;
+    border-radius: 0rem;
 }
 
 
 @keyframes arrive {
     from {
         background: gray;
+        border-radius: 0rem;
     }
     to {
         background: red;
+        border-radius: 1rem;
     }
 }
 
 @keyframes leave {
     from {
         background: red;
+        border-radius: 1rem;
     }
     to {
         background: gray;
+        border-radius: 0rem;
     }
 }
