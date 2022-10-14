@@ -13,22 +13,22 @@ import { useEvent } from '@reusable-ui/hooks'
 
 
 
-export interface AnimatingStateConfig<TState extends any> {
-    initialState   : TState | (() => TState)
-    fnState       ?: (state: TState) => TState
+export interface AnimatingStateOptions<TState extends any> {
+    initialState  : TState | (() => TState)
+    fnState      ?: (state: TState) => TState
     
-    bubbling      ?: boolean
-    animationName  : string|RegExp
+    bubbling     ?: boolean
+    animationName : string|RegExp
 };
-export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<TState>) => {
-    // configs:
+export const AnimatingState = <TState extends any>(options: AnimatingStateOptions<TState>) => {
+    // options:
     const {
         initialState,
         fnState,
         
         bubbling = false,
         animationName,
-    } = config;
+    } = options;
     
     
     
@@ -41,11 +41,11 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
     // updates:
     const newState = fnState ? fnState(state) : state; // calculate the new state
     
-    if (state !== newState) {          // a change detected => apply the change & start animating
+    if (state !== newState) {          // a change detected => apply the change & start animation
         setState(newState);            // remember the new state
         
         if (animation === undefined) { // if not **being** animated
-            setAnimation(newState);    // start animating of **new** state
+            setAnimation(newState);    // start animation of **new** state
         } // if
     } // if
     
@@ -62,10 +62,10 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
         
         // clean up finished animation:
         if (animation === state) {   // the current state **was animated**
-            setAnimation(undefined); // => stop animating of **current** state
+            setAnimation(undefined); // => stop animation of **current** state
         }
         else {                       // the current state **was changed** during the animation
-            setAnimation(state);     // => start animating of **another** state
+            setAnimation(state);     // => start animation of **another** state
         } // if
     });
     
