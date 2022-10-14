@@ -1,0 +1,37 @@
+button {
+    appearance: none;
+    background: gray;
+    inline-size: 8rem;
+    block-size: 3rem;
+}
+button.arriving {
+    animation: 2000ms ease-out both arrive;
+}
+button.arrived {
+    background: red;
+}
+button.leaving {
+    animation: 2000ms ease-out both leave;
+}
+button.leaved {
+    background: gray;
+}
+
+
+@keyframes arrive {
+    from {
+        background: gray;
+    }
+    to {
+        background: red;
+    }
+}
+
+@keyframes leave {
+    from {
+        background: red;
+    }
+    to {
+        background: gray;
+    }
+}

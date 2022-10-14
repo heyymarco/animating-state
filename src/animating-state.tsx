@@ -13,20 +13,20 @@ import { useEvent } from '@reusable-ui/hooks'
 
 
 
-export interface AnimatingStateOptions<TState extends any> {
-    initialState  : TState | (() => TState)
-    fnState      ?: (state: TState) => TState
+export interface AnimatingStateOptions<TState> {
+    initialState       : TState | (() => TState)
+    currentState       : TState
     
-    bubbling     ?: boolean
-    animationName : string|RegExp
+    animationBubbling ?: boolean
+    animationName      : string|RegExp
 };
-export const AnimatingState = <TState extends any>(options: AnimatingStateOptions<TState>) => {
+export const useAnimatingState = <TState, TElement extends Element = HTMLElement>(options: AnimatingStateOptions<TState>) => {
     // options:
     const {
         initialState,
-        fnState,
+        currentState,
         
-        bubbling = false,
+        animationBubbling = false,
         animationName,
     } = options;
     
@@ -39,7 +39,7 @@ export const AnimatingState = <TState extends any>(options: AnimatingStateOption
     
     
     // updates:
-    const newState = fnState ? fnState(state) : state; // calculate the new state
+    const newState = currentState;     // get the new state
     
     if (state !== newState) {          // a change detected => apply the change & start animation
         setState(newState);            // remember the new state
@@ -52,11 +52,11 @@ export const AnimatingState = <TState extends any>(options: AnimatingStateOption
     
     
     // handlers:
-    const handleAnimationEnd = useEvent<React.AnimationEventHandler<Element>>((event) => {
+    const handleAnimationEnd = useEvent<React.AnimationEventHandler<TElement>>((event) => {
         // conditions:
-        if (animation === undefined)                             return; // no running animation => nothing to stop
-        if (!bubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
-        if (!event.animationName.match(animationName))           return; // ignores foreign animations
+        if (animation === undefined)                                      return; // no running animation => nothing to stop
+        if (!animationBubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
+        if (!event.animationName.match(animationName))                    return; // ignores foreign animations
         
         
         
@@ -74,8 +74,6 @@ export const AnimatingState = <TState extends any>(options: AnimatingStateOption
     // interfaces:
     return [
         state,
-        setState,
-        
         animation,
         handleAnimationEnd,
     ] as const;
