@@ -18,7 +18,7 @@ export interface AnimatingStateConfig<TState extends any> {
     updateState   ?: (state: TState) => TState
     
     bubbling      ?: boolean
-    animationName  : RegExp
+    animationName  : string|RegExp
 };
 export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<TState>) => {
     // configs:
@@ -56,7 +56,7 @@ export const AnimatingState = <TState extends any>(config: AnimatingStateConfig<
         // conditions:
         if (animation === undefined)                             return; // no running animation => nothing to stop
         if (!bubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
-        if (!animationName.test(event.animationName))            return; // ignores foreign animations
+        if (!event.animationName.match(animationName))           return; // ignores foreign animations
         
         
         
