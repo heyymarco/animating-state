@@ -17,12 +17,18 @@ interface AnimatingState<TState extends ({}|null)> {
     state     : TState
     animation : TState|undefined
 }
+
+const enum AnimatingStateActionType {
+    Change,
+    Done,
+}
+
 interface AnimatingStateChangeAction<TState extends ({}|null)> {
-    type      : 'change',
+    type      : AnimatingStateActionType.Change,
     newState  : TState
 }
 interface AnimatingStateDoneAction<TState extends ({}|null)> {
-    type      : 'done',
+    type      : AnimatingStateActionType.Done,
 }
 type AnimatingStateAction<TState extends ({}|null)> =
     |AnimatingStateChangeAction<TState>
@@ -30,7 +36,7 @@ type AnimatingStateAction<TState extends ({}|null)> =
 
 const animatingStateReducer = <TState extends ({}|null)>(oldState: AnimatingState<TState>, action: AnimatingStateAction<TState>): AnimatingState<TState> => {
     switch (action.type) {
-        case 'change':
+        case AnimatingStateActionType.Change:
             if (!Object.is(oldState.state, action.newState)) {
                 return {
                     state     : action.newState,           // remember the new state
@@ -45,7 +51,7 @@ const animatingStateReducer = <TState extends ({}|null)>(oldState: AnimatingStat
             } // if
             break;
         
-        case 'done':
+        case AnimatingStateActionType.Done:
             if (oldState.animation !== undefined) { // **has** a running animation
                 return {
                     state     : oldState.state,
@@ -100,7 +106,7 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
     // handlers:
     const setState           = useEvent<React.Dispatch<React.SetStateAction<TState>>>((newState) => {
         // update with a new state:
-        dispatchState({ type: 'change', newState });
+        dispatchState({ type: AnimatingStateActionType.Change, newState });
     });
     const handleAnimationEnd = useEvent<React.AnimationEventHandler<TElement>>((event) => {
         // conditions:
@@ -110,7 +116,7 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
         
         
         // clean up finished animation:
-        dispatchState({ type: 'done' });
+        dispatchState({ type: AnimatingStateActionType.Done });
     });
     
     
