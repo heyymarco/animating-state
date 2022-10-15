@@ -129,7 +129,7 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
     // dom effects:
     useEffect(() => {
         // conditions:
-        if (state.animation === undefined) return; // no animation => no expected animation should run
+        if (state.animation === undefined) return; // no animation => no expected animation to be verified
         
         
         
@@ -147,7 +147,7 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
                 
                 
                 
-                // the expected animation is not running within 2 frames => mark as finished_animation:
+                // the expected animation is not running within 2 idle_frames => NOT verified => mark as finished_animation:
                 dispatchState({ type: AnimatingStateActionType.Done });
             });
         });
