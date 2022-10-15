@@ -44,7 +44,7 @@ const enum AnimatingStateActionType {
 
 interface AnimatingStateChangeAction<TState extends ({}|null)> {
     type      : AnimatingStateActionType.Change,
-    newState  : SetStateAction<TState>
+    newState  : TState
 }
 interface AnimatingStateDoneAction {
     type      : AnimatingStateActionType.Done,
@@ -57,7 +57,7 @@ const animatingStateReducer = <TState extends ({}|null)>(oldState: AnimatingStat
     switch (action.type) {
         case AnimatingStateActionType.Change:
             {
-                const newState = (typeof(action.newState) !== 'function') ? action.newState : (action.newState as ((prevState: TState) => TState))(oldState.state);
+                const newState = action.newState;
                 if (!Object.is(oldState.state, newState)) {    // the newState is **different** than oldState
                     return {
                         state     : newState,                  // remember the new state
@@ -164,8 +164,15 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
     
     // handlers:
     const setState             = useEvent<Dispatch<SetStateAction<TState>>>((newState) => {
+        // conditions:
+        const oldStateValue = state.state;
+        const newStateValue = (typeof(newState) !== 'function') ? newState : (newState as ((prevState: TState) => TState))(oldStateValue);
+        if (Object.is(oldStateValue, newStateValue)) return;
+        
+        
+        
         // update with a new state:
-        dispatchState({ type: AnimatingStateActionType.Change, newState });
+        dispatchState({ type: AnimatingStateActionType.Change, newState: newStateValue });
     });
     const handleAnimationStart = useEvent<AnimationEventHandler<TElement>>((event) => {
         // conditions:
