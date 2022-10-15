@@ -10,6 +10,8 @@ import {
     
     // hooks:
     useReducer,
+    useRef,
+    useEffect,
 }                           from 'react'
 
 import { useEvent } from '@reusable-ui/hooks'
@@ -120,22 +122,72 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
         state     : initialState,
         animation : undefined,
     });
+    const expectedAnimation = useRef<TState|undefined>(undefined);
+    
+    
+    
+    // dom effects:
+    useEffect(() => {
+        // conditions:
+        if (state.animation === undefined) return; // no animation => no expected animation should run
+        
+        
+        
+        // setups:
+        let asyncCheckRunningAnimation = requestIdleCallback(() => {
+            // tests:
+            if (Object.is(expectedAnimation.current, state.animation)) return; // the expected animation is running => verified
+            
+            
+            
+            // retry:
+            asyncCheckRunningAnimation = requestIdleCallback(() => {
+                // tests:
+                if (Object.is(expectedAnimation.current, state.animation)) return; // the expected animation is running => verified
+                
+                
+                
+                // the expected animation is not running within 2 frames => mark as finished_animation:
+                dispatchState({ type: AnimatingStateActionType.Done });
+            });
+        });
+        
+        
+        
+        // cleanups:
+        return () => {
+            cancelIdleCallback(asyncCheckRunningAnimation);
+        };
+    }, [state.animation]);
     
     
     
     // handlers:
-    const setState           = useEvent<Dispatch<SetStateAction<TState>>>((newState) => {
+    const setState             = useEvent<Dispatch<SetStateAction<TState>>>((newState) => {
         // update with a new state:
         dispatchState({ type: AnimatingStateActionType.Change, newState });
     });
-    const handleAnimationEnd = useEvent<AnimationEventHandler<TElement>>((event) => {
+    const handleAnimationStart = useEvent<AnimationEventHandler<TElement>>((event) => {
         // conditions:
         if (!animationBubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
         if (!event.animationName.match(animationName))                    return; // ignores foreign animations
         
         
         
-        // clean up finished animation:
+        // mark the expected_css_animation has started:
+        expectedAnimation.current = state.animation;
+    });
+    const handleAnimationEnd   = useEvent<AnimationEventHandler<TElement>>((event) => {
+        // conditions:
+        if (!animationBubbling && (event.target !== event.currentTarget)) return; // if not bubbling => ignores bubbling
+        if (!event.animationName.match(animationName))                    return; // ignores foreign animations
+        
+        
+        
+        // mark the expected_css_animation has stopped:
+        expectedAnimation.current = undefined;
+        
+        // clean up finished_animation:
         dispatchState({ type: AnimatingStateActionType.Done });
     });
     
@@ -143,10 +195,11 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
     
     // interfaces:
     return [
-        state.state,        // getter state
-        setState,           // setter state
+        state.state,          // getter state
+        setState,             // setter state
         
-        state.animation,    // animation state
-        handleAnimationEnd, // animation-end handler
+        state.animation,      // animation state
+        handleAnimationStart, // animation-start handler
+        handleAnimationEnd,   // animation-end handler
     ] as const;
 };
