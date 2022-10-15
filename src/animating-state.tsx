@@ -167,7 +167,7 @@ export const useAnimatingState = <TState extends ({}|null), TElement extends Ele
         // conditions:
         const oldStateValue = state.state;
         const newStateValue = (typeof(newState) !== 'function') ? newState : (newState as ((prevState: TState) => TState))(oldStateValue);
-        if (Object.is(oldStateValue, newStateValue)) return;
+        if (Object.is(oldStateValue, newStateValue)) return; // the newState is the same as oldState => nothing to change
         
         
         
