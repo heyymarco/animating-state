@@ -6,7 +6,7 @@ import './Button.css'
 
 
 const useInteractable = () => {
-    const [arrived, setArrived, animation, handleAnimationEnd] = useAnimatingState({
+    const [arrived, setArrived, animation, handleAnimationStart, handleAnimationEnd] = useAnimatingState({
         initialState  : false,
         animationName : /((?<![a-z])(arrive|leave)|(?<=[a-z])(Arrive|Leave))(?![a-z])/,
     });
@@ -44,6 +44,7 @@ const useInteractable = () => {
         
         handleMouseEnter,
         handleMouseLeave,
+        handleAnimationStart,
         handleAnimationEnd,
     };
 }
@@ -63,6 +64,7 @@ export const Button = () => {
             className={interactableState.class ?? ''}
             onMouseEnter={interactableState.handleMouseEnter}
             onMouseLeave={interactableState.handleMouseLeave}
+            onAnimationStart={interactableState.handleAnimationStart}
             onAnimationEnd={interactableState.handleAnimationEnd}
         >
             test

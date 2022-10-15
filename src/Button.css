@@ -1,6 +1,13 @@
+:root {
+    --leaved-borderRadius: 0.25rem;
+    --hovered-borderRadius: 1rem;
+    
+    --leaved-background: gray;
+    --hovered-background: red;
+}
 button {
     appearance: none;
-    background: gray;
+    background: var(--leaved-background);
     inline-size: 8rem;
     block-size: 3rem;
 }
@@ -8,36 +15,36 @@ button.arriving {
     animation: 150ms ease-out both arrive;
 }
 button.arrived {
-    background: red;
-    border-radius: 1rem;
+    background: var(--hovered-background);
+    border-radius: var(--hovered-borderRadius);
 }
 button.leaving {
     animation: 300ms ease-out both leave;
 }
 button.leaved {
-    background: gray;
-    border-radius: 0.25rem;
+    background: var(--leaved-background);
+    border-radius: var(--leaved-borderRadius);
 }
 
 
 @keyframes arrive {
     from {
-        background: gray;
-        border-radius: 0.25rem;
+        background: var(--leaved-background);
+        border-radius: var(--leaved-borderRadius);
     }
     to {
-        background: red;
-        border-radius: 1rem;
+        background: var(--hovered-background);
+        border-radius: var(--hovered-borderRadius);
     }
 }
 
 @keyframes leave {
     from {
-        background: red;
-        border-radius: 1rem;
+        background: var(--hovered-background);
+        border-radius: var(--hovered-borderRadius);
     }
     to {
-        background: gray;
-        border-radius: 0.25rem;
+        background: var(--leaved-background);
+        border-radius: var(--leaved-borderRadius);
     }
 }
