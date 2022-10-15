@@ -1,30 +1,46 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import { useEvent } from "@reusable-ui/hooks";
 import { useAnimatingState } from "./animating-state";
 import './Button.css'
 
 
 
-const useInteractable = () => {
+export interface InteractableProps {
+    arrived ?: boolean
+}
+const useInteractable = (props: InteractableProps) => {
+    const arrivedDn = useRef<boolean>(false);
+    const arrivedFn = props.arrived ?? arrivedDn.current;
+    
+    
+    
     const [arrived, setArrived, animation, handleAnimationStart, handleAnimationEnd] = useAnimatingState({
-        initialState  : false,
+        initialState  : arrivedFn,
         animationName : /((?<![a-z])(arrive|leave)|(?<=[a-z])(Arrive|Leave))(?![a-z])/,
     });
+    // useEffect(() => {
+    //     if (arrived !== arrivedFn) setArrived(arrivedFn);
+    // }, [arrived, arrivedFn]);
+    if (arrived !== arrivedFn) setArrived(arrivedFn);
     
     
     
     // handlers:
     const handleMouseEnter   = useEvent<React.MouseEventHandler<HTMLButtonElement>>(() => {
-        setArrived(true);
+        arrivedDn.current = true;
+        
+        if (props.arrived === undefined) setArrived(true);
     });
     
     const handleMouseLeave   = useEvent<React.MouseEventHandler<HTMLButtonElement>>(() => {
-        setArrived(false);
+        arrivedDn.current = false;
+        
+        if (props.arrived === undefined) setArrived(false);
     });
     
     
     
-    // console.log({hoverDn, arrived, animation})
+    console.log({arrived, animation})
     return {
         arrived,
         
@@ -51,14 +67,17 @@ const useInteractable = () => {
 
 
 
-export const Button = () => {
-    const interactableState = useInteractable();
+export interface ButtonProps {
+    arrived ?: boolean
+}
+export const Button = (props: ButtonProps) => {
+    const interactableState = useInteractable(props);
     
     
-    console.log({
-        arrived : interactableState.arrived,
-        class   : interactableState.class,
-    });
+    // console.log({
+    //     arrived : interactableState.arrived,
+    //     class   : interactableState.class,
+    // });
     return (
         <button
             className={interactableState.class ?? ''}
